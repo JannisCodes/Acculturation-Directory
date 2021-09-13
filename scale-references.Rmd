@@ -1,0 +1,43 @@
+---
+title: "Data Prep"
+author: "Jannis Kreienkamp"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+bibliography: "../acculturation-review/references.bib"
+csl: "../acculturation-review/apa.csl"
+---
+
+```{r setup, include=FALSE}
+lib <- c("rmarkdown", "knitr", "remedy", "bookdown", "rmdfiltr", "psych", "janitor", "bibtex",
+         "data.table", "dplyr", "tidyr", "Hmisc", "kableExtra", "readxl", "stringr", "reshape2")
+invisible(lapply(lib, library, character.only = TRUE))  
+rm(lib)  
+knitr::opts_chunk$set(echo = TRUE)
+#bib <- bibtex::read.bib("../acculturation-review/references.bib")
+
+# if renv is not working make sure that renv settings and renv/activate.R are set up correctly
+# also make sure that 'RENV_CONFIG_SANDBOX_ENABLED = FALSE' is in the .Renviron file.
+```
+
+```{r load, include=FALSE}
+load("../acculturation-review/data/AcculturationScales.RData")
+
+dt.Scales.Included <- dt.Scales.Included %>%
+    mutate(id = seq.int(nrow(dt.Scales.Included)))
+```
+
+```{r methodologicalTbl, echo=FALSE}
+dt.Scales.Included %>%
+  dplyr::select(id, Scale, ShortReference = CitationKey) %>%
+  mutate(ShortReference = paste0("@",ShortReference)) %>%
+  kbl(., 
+      caption = "Acculturation Scales",
+      format = "html") %>%
+  kable_classic(full_width = F, 
+                lightable_options = "hover", 
+                html_font = "Cambria")
+```
+
+# References  
+

@@ -1,0 +1,28 @@
+@import url(https://use.fontawesome.com/releases/v5.13.0/css/all.css);
+
+/* for pandoc --citeproc since 2.11 */
+.csl-bib-body { }
+.csl-entry {
+  clear: both;
+  margin-left:2em;
+  margin-right:2em;
+  padding-left:2em;
+  text-indent:-2em;
+  line-height: 1.5;
+}
+.hanging .csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+  padding-left:2em;
+}
+.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+.csl-indent {
+  margin-left: 2em;
+}
