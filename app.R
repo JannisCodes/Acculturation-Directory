@@ -4,6 +4,7 @@ library(shiny)
 library(shinydashboard)
 library(shinyjs)
 library(shinyWidgets)
+library(metathis)
 #library(dashboardthemes)
 
 # data manipulation stuff
@@ -13,7 +14,6 @@ library(tidyr)
 
 # display stuff
 library(DT)
-#library(bibtex)
 
 
 load("scales-data.RData")
@@ -102,10 +102,10 @@ ui <- dashboardPage(
         meta() %>%
             meta_social(
                 title = "Acculturation-Review: Scale Directory",
-                description = "A directoy of measurement tools for psychological acculturation.",
+                description = "An interactive directoy of psychological acculturation measurement tools (including items).",
                 url = "https://acculturation-review.shinyapps.io/scale-directory/",
-                image = "https://raw.githubusercontent.com/JannisCodes/PsyCorona-WebApp/master/www/media.png",
-                image_alt = "PsyCorona Data Tool",
+                image = "https://raw.githubusercontent.com/JannisCodes/acculturation-scales/master/www/media.png?token=AJEZTKBM2DG2GPDBRGAY25DBI7KTK",
+                image_alt = "Acculturation Scale Directory",
                 twitter_creator = "@JannisWrites",
                 twitter_card_type = "summary",
                 twitter_site = "@JannisWrites"
