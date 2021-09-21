@@ -5,7 +5,7 @@ account: acculturation-review
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 4637801
-bundleId: 5025990
+bundleId: 5035158
 url: https://acculturation-review.shinyapps.io/scale-directory/
-when: 1631493094.9711
-lastSyncTime: 1631493094.97111
+when: 1631697671.03247
+lastSyncTime: 1631697671.03257

@@ -17,13 +17,6 @@ library(DT)
 
 
 load("scales-data.RData")
-# dt.Scales.Included <- dt.Scales.Included %>%
-#     mutate(Item = str_replace_all(Item, "\n", "<br>"),
-#            ResponseRangeAnchors = str_replace_all(ResponseRangeAnchors, "\n", "<br>"),
-#            nlifeDomain = str_count(lifeDomain, ',')+1,
-#            lifeDomain = str_replace_all(lifeDomain, ",", "<br>"),
-#            NItems = as.numeric(NItems),
-#            id = seq.int(nrow(dt.Scales.Included)))
 
 scalesSelected <- dt.Scales.Included %>%
     dplyr::select(id, 
@@ -39,14 +32,16 @@ scalesSelected <- dt.Scales.Included %>%
            details = paste0(as.character(icon("eye-open", lib = "glyphicon")), " #", id)) %>%
     mutate_at(vars(Affect, Behavior, Cognition, Desire), ~replace_na(., 0)) %>%
     mutate_at(vars(Affect, Behavior, Cognition, Desire),
-              ~(ifelse(.==1, as.character(icon("ok", lib = "glyphicon")), "")))
+              ~(ifelse(.==1, as.character(icon("ok", lib = "glyphicon")), ""))) %>%
+    relocate(details, .after = id)
 
 
 # Define UI for application that draws a histogram
 ui <- dashboardPage(
     # Application title
     title = "Acculturation Scales",
-    dashboardHeader(title= span(tags$img(src = "https://raw.githubusercontent.com/JannisCodes/acculturation-review/main/assets/images/favicon-32x32.png?token=AJEZTKHAELGSLPX5P4LNK4LBIZCYA", width = "18px", height = "18px"), "Acculturation Scales")
+    dashboardHeader(title= span(tags$img(src = "https://raw.githubusercontent.com/JannisCodes/acculturation-review/main/assets/images/FaviconCreation/LogoV1_20x20.png?token=AJEZTKGKIMVPQ6SBJQ7JNDLBJDW2A", height = "18px"), "Acculturation Scales")
+    # dashboardHeader(title= span(tags$img(src = "https://raw.githubusercontent.com/JannisCodes/acculturation-review/main/assets/images/FaviconCreation/LogoV2_20x20.png?token=AJEZTKA365MU2ITKIADDGUTBJDW52", height = "18px"), "Acculturation Scales")
     ),
 
     # Sidebar
@@ -60,7 +55,7 @@ ui <- dashboardPage(
                    <br>This work is licensed under a <a rel=\"license\" href=\"http://creativecommons.org/licenses/by-nc/4.0/\" target=\"_blank\">Creative Commons Attribution-NonCommercial 4.0 International License</a>.
                    <br><a rel=\"license\" href=\"http://creativecommons.org/licenses/by-nc/4.0/\" target=\"_blank\"><img alt=\"Creative Commons License\" style=\"border-width:0\" src=\"https://i.creativecommons.org/l/by-nc/4.0/88x31.png\" /></a>
                    <br>Last updated:<br>"), 
-                   Sys.time(),
+                   updateDate,
                    id = "sideFooter",
                    align = "left",
                    style = "
@@ -130,9 +125,17 @@ ui <- dashboardPage(
                     box(
                         title = "Filters",
                         width = 6,
-                        tags$b("Please use the filters below to identify relevant acculturation scales."),
-                        br(),
-                        br(),
+                        
+                        searchInput(
+                            inputId = "scaleSearch", 
+                            label = "Search within scale names",
+                            placeholder = "Your search term (e.g., adaptation) ...",
+                            btnSearch = icon("search"),
+                            btnReset = icon("remove")
+                        ),
+                        
+                        hr(),
+                        
                         awesomeCheckbox(
                             inputId = "ExperienceCheck",
                             label = tags$b("Filter by Experience Aspects"), 
@@ -170,6 +173,9 @@ ui <- dashboardPage(
                             inline = TRUE,
                             fill = TRUE
                         ),
+                        
+                        hr(),
+                        
                         sliderInput("sliderNItems", "Number of Items", 
                                     min = min(dt.Scales.Included$NItems, na.rm = TRUE), 
                                     max = max(dt.Scales.Included$NItems, na.rm = TRUE),
@@ -197,9 +203,9 @@ ui <- dashboardPage(
                                 tags$i("The Migration Experience: A Conceptual Framework and Systematic Review of Psychological Acculturation") , 
                                 "' (",
                                 tags$a(href="https://doi.org/toBePublished", target="_blank", "doi.org/toBePublished"),
-                                "). As part of our systematic review of the literature on acculturation, we collected and analyzed all 
+                                "). As part of our systematic review of the literature on acculturation, we collected and analyzed 
                                 scales that were used to measure 'psychological acculturation'. For all scales we extracted the publicly available
-                                scale construction (see 'Click for more detail') and then coded whether the scales conceptualized psychological acculturation in terms of
+                                scale construction (see 'View' column) and then coded whether the scales conceptualized psychological acculturation in terms of
                                 affect (e.g., feeling at home), behavior (e.g., language use), cognition (e.g., ethnic identification), 
                                 and desire (e.g., independence wish)."
                                 )
@@ -230,11 +236,17 @@ ui <- dashboardPage(
                                         fit the current filters and lists a number of key information about the scale. Next to the name of the scale,
                                         the apa short reference, the number or items, and number of life domains, the overview also indicates 
                                         whether the scale included any of the affect, behavior, cognition, and/or desire aspects (ABCD). 
-                                        Lastly, the final column is a click-able area, which gives access to additional information about the scale.
+                                        Lastly, the first column is a click-able area, which gives access to additional information about the scale.
                                         Wherever (publicly) available, we list the exact items, the response options, the life domains considered,
                                         as well as some information on the validation sample."),
-                                tags$li("The filter section currently houses three main filters to indentify scales that fit your needs:",
+                                tags$li("The filter section currently houses three main filters to identify scales that fit your needs:",
                                         tags$ul(
+                                            tags$li("The",
+                                                    tags$i("Title Search"),
+                                                    "lets you search for words in the title of the scale. This might aid users searching for a
+                                                    particular scale by name or for a topic that might be included as part of the scale name (e.g., 
+                                                    attitudes)."
+                                            ),
                                             tags$li("The",
                                                     tags$i("Experience Aspect Filter"),
                                                     "allows to filter the inclusion of the affect, behavior, cognition,
@@ -247,17 +259,17 @@ ui <- dashboardPage(
                                             tags$li("The",
                                                     tags$i("Number of Items Filter"),
                                                    "allows to filter the acculturation scales by the number of items. You can use the slider to 
-                                                   select the minumum and maximum number of items the scale is allowed to have."
+                                                   select the minimum and maximum number of items the scale is allowed to have."
                                                     ),
                                             tags$li("The",
                                                     tags$i("Number of Domains Filter"),
                                                     "allows to filter the scales by the number of life domains (i.e., situational contexts) assessed
-                                                    within the scale. . You can use the slider to select the minumum and maximum number of domains you 
+                                                    within the scale. You can use the slider to select the minimum and maximum number of domains you 
                                                     would like to be included. For more information on the life domains see the 'Model' section below."
                                                     )
                                             )
                                         ),
-                                tags$li("The information section offers a top-level overview of the curren scale selection.
+                                tags$li("The information section offers a top-level overview of the current scale selection.
                                         The current version shows the number scales that fit the current filter choices, 
                                         the average number of items of the selected scales, the total number of items of all
                                         selected scales, as well as a short general introduction to the directory.")
@@ -265,25 +277,22 @@ ui <- dashboardPage(
                             tags$b("Features"),br(),
                             "This scale directory has three main functions.",
                             tags$ol(
-                                tags$li("Measurement Selection: The most practical functions of this application is to aid
-                                        researchers and practitioners in the selection of acculturation measurements. The 
-                                        study of acculturation has resulted in a large number of measurement tools (of which we 
-                                        list 233 here), making a choice between these different tools can be difficult. Not only
-                                        is it difficult to gain an overview of the number of scales used within the literature,
-                                        also the diversity in style and content can be overwhelming. We hope that the filter options
-                                        we provide here can offer a first theory-based and (somewhat) intuitive entry into the 
-                                        plethora for acculturation scales."),
-                                tags$li("Scale Access: We hope to make the scales easily accessible to the users of the 
-                                        application. We do so by making all (publicly) available scale items available by clicking the 
-                                        eye icon in the 'Click for more detail' column. We additionally list the full reference to the
+                                tags$li("Measurement Selection: The most practical function of this application is to aid researchers and practitioners 
+                                        in the selection of acculturation measurements. The study of acculturation has produced an immense number of 
+                                        acculturation scales, and making a choice between these different tools can be difficult. Not only is it difficult 
+                                        to gain an overview of the number of scales used within the literature, also the diversity in style and content can 
+                                        be overwhelming. We hope that the filter options we provide in our application can offer a first theory-based and 
+                                        intuitive entry into the plethora for acculturation scales. It should be noted that this directory is not meant to 
+                                        replace a full methodological review and does only present a small amount of information on the scales."),
+                                tags$li("Scale Access: We do so by showcasing all (publicly) available scale items by clicking the eye icon in the
+                                        'View' column. We additionally list the full reference to the
                                         scale in the", a("References", onclick = "openTab('references')", href="#"),"tab (also see the 'Reference' 
                                         column in the", a("scale directory", onclick = "openTab('scales')", href="#"),")."),
-                                tags$li("Exploration of Review Results: As part of the framework development and systematic review 
-                                        we have identified a number of status quo charateristics about the methodological literature 
-                                        on acculturation (e.g., which experience aspects are often included, which are commonly considered
-                                        jointly, or how this compares to the theoretical and applied literature; see the main manuscript 
-                                        for more information). The table and the appended filter allow readers an interactive access 
-                                        to the data and users might gain an intuitive understanding of the current state of the literature."),
+                                tags$li("Exploration of Review Results: As part of the framework development and systematic review, we have arrived at a 
+                                        number of conclusions about the methodological literature on acculturation. We hope that readers can use this 
+                                        directory in conjunction with the main article and explore the results themselves. The data table and the appended 
+                                        filter allow readers an interactive access to the data and users might gain an intuitive understanding of the current 
+                                        state of the literature"),
                             )
                         ),
                         box(
@@ -294,10 +303,12 @@ ui <- dashboardPage(
                             These inconsistencies make it difficult to compare past literature on acculturation, hinder straight-forward measurement 
                             selections, and hampers the development of an overarching framework. To structure our understanding of the migration process, 
                             we propose to utilize the four basic elements of human experiences (wanting, feeling, thinking, and doing) as a conceptual 
-                            framework. We use this framework to build a theory-driven literature synthesis and find that the past theoretical 
+                            framework. We use this framework to build a theory-driven literature synthesis of past theoretical 
                             (final ", tags$i("N"), " = 92), methodological (final ", tags$i("N"), " = 233) and empirical literature (final ", 
-                            tags$i("N"), " = 530) have understudied the more internal aspects of acculturation (motivations and feelings) 
-                            and have often fallen short of capturing all four aspects of the migration experience."
+                            tags$i("N"), " = 530). We find that especially empirical works have understudied the more internal aspects of acculturation 
+                            (motivations and feelings) and have often fallen short of capturing all four aspects of the migration experience. 
+                            We also show differences between publication fields and discuss how the framework can aid transparent and functional theories, 
+                            studies, and interventions going forward."
                         ),
                         box(
                             title = "The Model",
@@ -305,12 +316,33 @@ ui <- dashboardPage(
                             width = 12,
                             column(
                                 width = 4,
-                                img(src="https://raw.githubusercontent.com/JannisCodes/acculturation-review/main/Figures/ConceptualFrameworkStatic.png?token=AJEZTKCP3PRD3B7NCUQH4YLBIR5NS", width="100%")
+                                img(src="https://raw.githubusercontent.com/JannisCodes/acculturation-review/main/Figures/ConceptualFrameworkStatic.png?token=AJEZTKCP3PRD3B7NCUQH4YLBIR5NS", width="100%"),
+                                HTML(
+                                    "<em>Figure 1</em>: Conceptual Framework with Context from the main manuscript."
+                                )
                             ),
                             column(
                                 width = 8,
                                 HTML(
-                                    "Short description of the model: ABCD and life domains." 
+                                    "<br>To build a framework that would comprehensively structure the concept of psychological acculturation across a wide range of contexts, 
+                                    we propose to utilize the basic elements of human experiences. Building on discussions with experts in the field and past reviews, 
+                                    we propose that the psychological acculturation experience can be understood in terms of affects, behaviors, cognitions, and desires. 
+                                    Psychological acculturation in this framework might, for example, be understood or measured in terms of behavioral acculturation, 
+                                    such as language use, or voting; cognitive acculturation, such as ethnic identification, or cultural values endorsement; 
+                                    affective acculturation, such as feeling at home, or loneliness; motivational acculturation, such as the satisfaction of competence or 
+                                    independence needs; or as a combination of any or all of these aspects. Coding the available acculturation scales identified during the 
+                                    systematic review inspired the creation of this scale directory and the chosen filter options.<br><br>",
+                                    "Three major contextual factors often found within the literature are the cultures of the dominant and non-dominant groups, 
+                                    the interacting individuals, and the interaction situation or life domain. All of these contextual elements will likely have a profound 
+                                    impact on the experience of affects, behaviors, cognitions, and desires. As part of the directory we present here, we list the situational 
+                                    context that is captured in the acculturation scales. One way of structuring this situational context is what we will here refer to as 
+                                    the life domains &#8212 the idea that the social experience will take place within different domains in life. Based on sociological 
+                                    theories of social institutions (Durkheim, 1982), literature on life domains in acculturation (Arends-Tóth & van de Vijver, 2006, 2007; Zane & Mak, 2004), 
+                                    a categorization of psychological influences by the British Psychological Society (Michie et al., 2005), and Bronfenbrenner's 
+                                    Ecological systems theory (Bronfenbrenner, 1992), we conceptualized a range of life domains relevant to the migration process 
+                                    (also see Figure 1). These life domains are exlicitly or indirectly the target of many acculturation scales. We list all domains 
+                                    that were explicitly refered to by the authors of the scales (within the scale pop-up box, via the 'View' button) and offer the option
+                                    to filter scales by the number of life domains they address."
                                 )
                             )
                             
@@ -341,7 +373,8 @@ server <- function(input, output) {
     scaleSelectedReact <- reactive({
         if(input$ExperienceCheck == TRUE){
             scalesSelected %>%
-                filter(Affect == ifelse(input$AffectSwitch==TRUE, as.character(icon("ok", lib = "glyphicon")), ""),
+                filter(grepl(tolower(input$scaleSearch),tolower(Scale)),
+                       Affect == ifelse(input$AffectSwitch==TRUE, as.character(icon("ok", lib = "glyphicon")), ""),
                        Behavior == ifelse(input$BehaviorSwitch==TRUE, as.character(icon("ok", lib = "glyphicon")), ""),
                        Cognition == ifelse(input$CognitionSwitch==TRUE, as.character(icon("ok", lib = "glyphicon")), ""),
                        Desire == ifelse(input$DesireSwitch==TRUE, as.character(icon("ok", lib = "glyphicon")), ""),
@@ -351,7 +384,8 @@ server <- function(input, output) {
                        nlifeDomain <= input$sliderNDomains[[2]])
         } else {
             scalesSelected %>%
-                filter(NItems >= input$sliderNItems[[1]],
+                filter(grepl(tolower(input$scaleSearch),tolower(Scale)),
+                       NItems >= input$sliderNItems[[1]],
                        NItems <= input$sliderNItems[[2]], 
                        nlifeDomain >= input$sliderNDomains[[1]], 
                        nlifeDomain <= input$sliderNDomains[[2]])
@@ -360,9 +394,9 @@ server <- function(input, output) {
     
     output$scalesTable = DT::renderDataTable({
         datatable(scaleSelectedReact(), 
-                  colnames = c("Scale", "Reference", 
+                  colnames = c("View", "Scale", "Reference", 
                                "Affect", "Behavior", "Cognition", "Desire", 
-                               "Number of Items", "Number of Life Domains", "Click for more detail"), 
+                               "Number of Items", "Number of Life Domains"), 
                   rownames = FALSE, 
                   selection = 'none',
                   # class = 'cell-border strip hover',
@@ -373,11 +407,11 @@ server <- function(input, output) {
                       scrollY = 500,
                       scroller = TRUE,
                       searching = FALSE,
-                      columnDefs=list(list(targets=4:length(scalesSelected)-1, class="dt-center"),
+                      columnDefs=list(list(targets=5:length(scalesSelected)-1, class="dt-center"),
                                       list(targets=0, visible=FALSE))
                       )
                   ) %>% 
-            formatStyle(0, cursor = 'pointer')
+            formatStyle(2, cursor = 'pointer')
                                              }) 
     
     output$nScalesSelected <- renderValueBox({
@@ -409,7 +443,7 @@ server <- function(input, output) {
         info = input$scalesTable_cell_clicked
         id = sub(".*#", "", info$value)
         # do nothing if not clicked yet, or the clicked cell is not in the last column
-        if (is.null(info$value) || info$col != length(scalesSelected)-1) return()
+        if (is.null(info$value) || info$col != 1) return()
         showModal(modalDialog(
             title = paste0("Information: ", dt.Scales.Included$Scale[dt.Scales.Included$id==id]),
             easyClose = TRUE,

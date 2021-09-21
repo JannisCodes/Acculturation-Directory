@@ -9,5 +9,6 @@ rsconnect::deployApp(account = "acculturation-review",
                      appFiles = c("app.R", 
                                   "scales-data.RData",
                                   "favicon.ico",
+                                  "www/favicon.ico",
                                   "www/custom.css"),
                      appName = "scale-directory")

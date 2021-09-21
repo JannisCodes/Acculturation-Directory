@@ -23,4 +23,6 @@ dt.Scales.Included <- merge(dt.Scales.Included, referencesShort %>% dplyr::selec
 
 refSec <- paste(html_nodes(refHtml, "[id='refs']"))
 
-save(dt.Scales, dt.Scales.Included, refSec, file = "scales-data.RData")
+updateDate <- Sys.time()
+
+save(dt.Scales, dt.Scales.Included, refSec, updateDate, file = "scales-data.RData")
