@@ -40,7 +40,7 @@ scalesSelected <- dt.Scales.Included %>%
 ui <- dashboardPage(
     # Application title
     title = "Acculturation Scales",
-    dashboardHeader(title= span(tags$img(src = "https://raw.githubusercontent.com/JannisCodes/acculturation-review/main/assets/images/FaviconCreation/LogoV1_20x20.png?token=AJEZTKGKIMVPQ6SBJQ7JNDLBJDW2A", height = "18px"), "Acculturation Scales")
+    dashboardHeader(title= span(tags$img(src = "LogoV1_20x20.png", height = "18px"), "Acculturation Scales")
     # dashboardHeader(title= span(tags$img(src = "https://raw.githubusercontent.com/JannisCodes/acculturation-review/main/assets/images/FaviconCreation/LogoV2_20x20.png?token=AJEZTKA365MU2ITKIADDGUTBJDW52", height = "18px"), "Acculturation Scales")
     ),
 
@@ -99,7 +99,7 @@ ui <- dashboardPage(
                 title = "Acculturation-Review: Scale Directory",
                 description = "An interactive directoy of psychological acculturation measurement tools (including items).",
                 url = "https://acculturation-review.shinyapps.io/scale-directory/",
-                image = "https://raw.githubusercontent.com/JannisCodes/acculturation-scales/master/www/media.png?token=AJEZTKBM2DG2GPDBRGAY25DBI7KTK",
+                image = "media.png",
                 image_alt = "Acculturation Scale Directory",
                 twitter_creator = "@JannisWrites",
                 twitter_card_type = "summary",
@@ -316,7 +316,7 @@ ui <- dashboardPage(
                             width = 12,
                             column(
                                 width = 4,
-                                img(src="https://raw.githubusercontent.com/JannisCodes/acculturation-review/main/Figures/ConceptualFrameworkStatic.png?token=AJEZTKCP3PRD3B7NCUQH4YLBIR5NS", width="100%"),
+                                img(src="ConceptualFrameworkStatic.png", width="100%"),
                                 HTML(
                                     "<em>Figure 1</em>: Conceptual Framework with Context from the main manuscript."
                                 )
