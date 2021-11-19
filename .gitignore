@@ -3,3 +3,6 @@
 *.RData
 .Ruserdata
 ShinyAppSetup.R
+Tables
+renv
+rsconnect
