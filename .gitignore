@@ -1,7 +1,8 @@
 .Rproj.user
 .Rhistory
-*.RData
 .Ruserdata
+.DS_Store
+*.RData
 ShinyAppSetup.R
 Tables
 renv
