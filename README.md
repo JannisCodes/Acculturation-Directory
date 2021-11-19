@@ -1,6 +1,7 @@
-# acculturation-scales
-
+# Acculturation Scales Directory [R Shiny Dashboard Application]
 [![Version](https://badge.fury.io/gh/tterb%2FHyde.svg)](https://badge.fury.io/gh/tterb%2FHyde)
+![image]({https://img.shields.io/badge/RStudio-75AADB?style=for-the-badge&logo=RStudio&logoColor=white})
+[![](https://img.shields.io/badge/Shiny-shinyapps.io-blue?style=flat&labelColor=white&logo=RStudio&logoColor=blue)](https://matt.dray.shinyapps.io/randoflag/)
 
 This GitHub repository collects the code for the acculturation scale directory. 
 A life version of the shiny dashboard is available here: https://acculturation-review.shinyapps.io/scale-directory/
