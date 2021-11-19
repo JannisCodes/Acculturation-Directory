@@ -1,5 +1,7 @@
 # acculturation-scales
 
+[![Version](https://badge.fury.io/gh/tterb%2FHyde.svg)](https://badge.fury.io/gh/tterb%2FHyde)
+
 This GitHub repository collects the code for the acculturation scale directory. 
 A life version of the shiny dashboard is available here: https://acculturation-review.shinyapps.io/scale-directory/
 
@@ -14,3 +16,5 @@ The creation of this application has been approached in three main steps:
   - the '*www*' folder includes additional icon, and css files as well as image files used in the application
 - Application: the main application code is available in the '*app.R*' file
 - Deployment: a general example of how to publish the file to a (free) shinyapp.io account is available in the '*ShinyAppPublishExample.R*' file
+
+## 
