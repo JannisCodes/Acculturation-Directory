@@ -1,11 +1,12 @@
 unlink('rsconnect', recursive=TRUE)
 library(rsconnect)
-rsconnect::setAccountInfo(name='acculturation-review', 
-                          token='D68F9BC7ECB061AC7338C894778F0099', 
-                          secret='b64FgrXVQnbqazL5e7d0zaJI9Jqn9W0wgilMtYbS')
+rsconnect::setAccountInfo(name='acculturation-review', # name of your shinyapp.io account 
+                          token='YOUR SHINYAPPS.IO ACCOUNT TOKEN', 
+                          secret='YOUR SHINYAPPS.IO ACCOUNT SECRET')
 
 # deploy application
 rsconnect::deployApp(account = "acculturation-review",
+                     # Select which files should be up uploaded
                      appFiles = c("app.R", 
                                   "scales-data.RData",
                                   "favicon.ico",

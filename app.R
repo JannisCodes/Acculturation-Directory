@@ -16,8 +16,11 @@ library(tidyr)
 library(DT)
 
 
+# load data which is a spread sheet with scale name, reference, codings, and items.
 load("scales-data.RData")
 
+# data preparation:
+# reduce data frame and create new content to display
 scalesSelected <- dt.Scales.Included %>%
     dplyr::select(id, 
                   Scale, 
@@ -28,15 +31,15 @@ scalesSelected <- dt.Scales.Included %>%
                   Desire = DesireFinal,
                   NItems,
                   nlifeDomain) %>%
-    mutate(Scale = sub("\\(.*", "", Scale),
-           details = paste0(as.character(icon("eye-open", lib = "glyphicon")), " #", id)) %>%
-    mutate_at(vars(Affect, Behavior, Cognition, Desire), ~replace_na(., 0)) %>%
+    mutate(Scale = sub("\\(.*", "", Scale), # remove short reference info
+           details = paste0(as.character(icon("eye-open", lib = "glyphicon")), " #", id)) %>% # add the eye icon for more detail pop-up with row ID 
+    mutate_at(vars(Affect, Behavior, Cognition, Desire), ~replace_na(., 0)) %>% 
     mutate_at(vars(Affect, Behavior, Cognition, Desire),
               ~(ifelse(.==1, as.character(icon("ok", lib = "glyphicon")), ""))) %>%
-    relocate(details, .after = id)
+    relocate(details, .after = id) # reorder
 
 
-# Define UI for application that draws a histogram
+# Define UI for application (shinydashboard)
 ui <- dashboardPage(
     # Application title
     title = "Acculturation Scales",
@@ -68,7 +71,7 @@ ui <- dashboardPage(
     ),
 
     dashboardBody(
-        
+        # add custom HTML head section (for favicon, css and social media display)
         tags$head(
             tags$link(rel = "shortcut icon", href = "favicon.ico"),
             tags$link(rel = "stylesheet", type = "text/css", href = "custom.css"),
@@ -106,6 +109,7 @@ ui <- dashboardPage(
                 twitter_site = "@JannisWrites"
             ),
         
+        # enable shiny javascript
         shinyjs::useShinyjs(),
         
         # ### changing theme
@@ -113,17 +117,17 @@ ui <- dashboardPage(
         #     theme = "poor_mans_flatly"
         # ),
         
-        tabItems(
+        tabItems( # multiple tabs in sidebar
             tabItem(tabName = "scales",
                     fluidRow(
                     box(
                         width = 12,
                         status = "primary",
-                        DT::dataTableOutput("scalesTable")
+                        DT::dataTableOutput("scalesTable") # main datatable
                     )),
                 fluidRow(
                     box(
-                        title = "Filters",
+                        title = "Filters", # filter box with filter inputs
                         width = 6,
                         
                         searchInput(
@@ -190,7 +194,7 @@ ui <- dashboardPage(
                         )
                     ),
                     box(
-                        title = "Information",
+                        title = "Information", # information panel (dynamic)
                         width = 6,
                         tags$h5(tags$b("Currently Selected:")),
                         valueBoxOutput("nScalesSelected"),
@@ -213,7 +217,7 @@ ui <- dashboardPage(
                     )
                 )
             ),
-            tabItem(tabName = "references",
+            tabItem(tabName = "references", # reference section imported from HTML file
                       fluidRow(
                           box(
                               title = "Scale References",
@@ -222,7 +226,7 @@ ui <- dashboardPage(
                           )
                       )
             ),
-            tabItem(tabName = "about",
+            tabItem(tabName = "about", # about tab with information about the project and interface explanation
                     fluidRow(
                         box(
                             title = "How to Use the Directory",
@@ -353,9 +357,10 @@ ui <- dashboardPage(
     )
 )
 
-# Define server logic required to draw a histogram
+# Define server logic required to draw interactive elements
 server <- function(input, output) {
     
+    # observe whether experience filters should be enabled 
     observeEvent(input$ExperienceCheck, {
         if(input$ExperienceCheck == TRUE){
             shinyjs::enable("AffectSwitch")
@@ -370,6 +375,7 @@ server <- function(input, output) {
         }
         })
     
+    # filter datatable based on filter inputs
     scaleSelectedReact <- reactive({
         if(input$ExperienceCheck == TRUE){
             scalesSelected %>%
@@ -392,6 +398,7 @@ server <- function(input, output) {
         }
     })
     
+    # create data table based on reactive (i.e., filtered) data set.
     output$scalesTable = DT::renderDataTable({
         datatable(scaleSelectedReact(), 
                   colnames = c("View", "Scale", "Reference", 
@@ -414,6 +421,7 @@ server <- function(input, output) {
             formatStyle(2, cursor = 'pointer')
                                              }) 
     
+    # calculate data information boxes
     output$nScalesSelected <- renderValueBox({
         valueBox(
             nrow(scaleSelectedReact()),
@@ -439,17 +447,15 @@ server <- function(input, output) {
         )
     })
     
+    # create pop up box. If person clicks on eye symbol the information from the main data frame is displayed as HTML element
     observeEvent(input$scalesTable_cell_clicked, {
         info = input$scalesTable_cell_clicked
         id = sub(".*#", "", info$value)
-        # do nothing if not clicked yet, or the clicked cell is not in the last column
+        # do nothing if not clicked yet, or the clicked cell is not in the first column
         if (is.null(info$value) || info$col != 1) return()
         showModal(modalDialog(
             title = paste0("Information: ", dt.Scales.Included$Scale[dt.Scales.Included$id==id]),
             easyClose = TRUE,
-            # info$row,
-            # info$col,
-            # info$value,
             tags$div(
                 HTML(paste(tags$h4("Items:"),
                            dt.Scales.Included$Item[dt.Scales.Included$id==id],
