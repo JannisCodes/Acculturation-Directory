@@ -38,6 +38,9 @@ scalesSelected <- dt.Scales.Included %>%
               ~(ifelse(.==1, as.character(icon("ok", lib = "glyphicon")), ""))) %>%
     relocate(details, .after = id) # reorder
 
+# set update date manualy
+updateDate <- "2022-03-15 11:02:00 CEST"
+
 
 # Define UI for application (shinydashboard)
 ui <- dashboardPage(
@@ -54,9 +57,10 @@ ui <- dashboardPage(
                     menuItem("References", tabName = "references", icon = icon("book-reader")),
                     menuItem("About", tabName = "about", icon = icon("info"))),
         shinyjs::useShinyjs(),
-        tags$footer(HTML("<strong>Copyright &copy; 2021</strong> 
+        tags$footer(HTML("<strong>Copyright &copy; 2022</strong> 
                    <br>This work is licensed under a <a rel=\"license\" href=\"http://creativecommons.org/licenses/by-nc/4.0/\" target=\"_blank\">Creative Commons Attribution-NonCommercial 4.0 International License</a>.
                    <br><a rel=\"license\" href=\"http://creativecommons.org/licenses/by-nc/4.0/\" target=\"_blank\"><img alt=\"Creative Commons License\" style=\"border-width:0\" src=\"https://i.creativecommons.org/l/by-nc/4.0/88x31.png\" /></a>
+                   <br>All included works retain their original copyrights.
                    <br>Last updated:<br>"), 
                    updateDate,
                    id = "sideFooter",
@@ -319,14 +323,7 @@ ui <- dashboardPage(
                             solidHeader = TRUE,
                             width = 12,
                             column(
-                                width = 4,
-                                img(src="ConceptualFrameworkStatic.png", width="100%"),
-                                HTML(
-                                    "<em>Figure 1</em>: Conceptual Framework with Context from the main manuscript."
-                                )
-                            ),
-                            column(
-                                width = 8,
+                                width = 12,
                                 HTML(
                                     "<br>To build a framework that would comprehensively structure the concept of psychological acculturation across a wide range of contexts, 
                                     we propose to utilize the basic elements of human experiences. Building on discussions with experts in the field and past reviews, 
@@ -346,7 +343,17 @@ ui <- dashboardPage(
                                     Ecological systems theory (Bronfenbrenner, 1992), we conceptualized a range of life domains relevant to the migration process 
                                     (also see Figure 1). These life domains are exlicitly or indirectly the target of many acculturation scales. We list all domains 
                                     that were explicitly refered to by the authors of the scales (within the scale pop-up box, via the 'View' button) and offer the option
-                                    to filter scales by the number of life domains they address."
+                                    to filter scales by the number of life domains they address.<br>"
+                                )
+                            ),
+                            column(
+                                width = 12,
+                                HTML(
+                                    "<br>"
+                                ),
+                                img(src="ConceptualFrameworkExpanded.png", width="80%"),
+                                HTML(
+                                    "<br><em>Figure 1</em>: Conceptual Framework with Context from the main manuscript."
                                 )
                             )
                             
