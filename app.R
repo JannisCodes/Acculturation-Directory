@@ -38,26 +38,40 @@ scalesSelected <- dt.Scales.Included %>%
               ~(ifelse(.==1, as.character(icon("ok", lib = "glyphicon")), ""))) %>%
     relocate(details, .after = id) # reorder
 
+# reduce data frame and create new content to display
+theoriesSelected <- dt.Theories.Included %>%
+  dplyr::select(Theory, 
+                ShortReference,
+                Affect = AffectFinal,
+                Behavior = BehaviorFinal,
+                Cognition = CognitionFinal,
+                Desire = DesireFinal) %>%
+  mutate(Theory = sub("\\(.*", "", Theory)) %>% # remove short reference info
+  mutate_at(vars(Affect, Behavior, Cognition, Desire), ~replace_na(., 0)) %>% 
+  mutate_at(vars(Affect, Behavior, Cognition, Desire),
+            ~(ifelse(.==1, as.character(icon("ok", lib = "glyphicon")), "")))
+
 # set update date manualy
-updateDate <- "2022-03-15 11:02:00 CEST"
+updateDate <- "2023-03-25 11:02:00 CEST"
 
 
 # Define UI for application (shinydashboard)
 ui <- dashboardPage(
     # Application title
-    title = "Acculturation Scales",
-    dashboardHeader(title= span(tags$img(src = "LogoV1_20x20.png", height = "18px"), "Acculturation Scales")
-    # dashboardHeader(title= span(tags$img(src = "https://raw.githubusercontent.com/JannisCodes/acculturation-review/main/assets/images/FaviconCreation/LogoV2_20x20.png?token=AJEZTKA365MU2ITKIADDGUTBJDW52", height = "18px"), "Acculturation Scales")
+    title = "Acculturation Directory",
+    dashboardHeader(title= span(tags$img(src = "LogoV1_20x20.png", height = "18px"), "Acculturation Directory")
+    # dashboardHeader(title= span(tags$img(src = "https://raw.githubusercontent.com/JannisCodes/acculturation-review/main/assets/images/FaviconCreation/LogoV2_20x20.png?token=AJEZTKA365MU2ITKIADDGUTBJDW52", height = "18px"), "Acculturation Directory")
     ),
 
     # Sidebar
     dashboardSidebar(
         sidebarMenu(id = "sidebarMenu",
                     menuItem("The Scales", tabName = "scales", icon = icon("tasks")),
+                    menuItem("The Theories", tabName = "theories", icon = icon("lightbulb")),
                     menuItem("References", tabName = "references", icon = icon("book-reader")),
                     menuItem("About", tabName = "about", icon = icon("info"))),
         shinyjs::useShinyjs(),
-        tags$footer(HTML("<strong>Copyright &copy; 2022</strong> 
+        tags$footer(HTML("<strong>Copyright &copy; 2023</strong> 
                    <br>This work is licensed under a <a rel=\"license\" href=\"http://creativecommons.org/licenses/by-nc/4.0/\" target=\"_blank\">Creative Commons Attribution-NonCommercial 4.0 International License</a>.
                    <br><a rel=\"license\" href=\"http://creativecommons.org/licenses/by-nc/4.0/\" target=\"_blank\"><img alt=\"Creative Commons License\" style=\"border-width:0\" src=\"https://i.creativecommons.org/l/by-nc/4.0/88x31.png\" /></a>
                    <br>All included works retain their original copyrights.
@@ -103,11 +117,11 @@ ui <- dashboardPage(
         ),
         meta() %>%
             meta_social(
-                title = "Acculturation-Review: Scale Directory",
-                description = "An interactive directoy of psychological acculturation measurement tools (including items).",
-                url = "https://acculturation-review.shinyapps.io/scale-directory/",
+                title = "Acculturation Directory",
+                description = "An interactive directoy of theories and measurements of psychological acculturation (including items).",
+                url = "https://acculturation-review.shinyapps.io/acculturation-directory/",
                 image = "media.png",
-                image_alt = "Acculturation Scale Directory",
+                image_alt = "Acculturation Directory",
                 twitter_creator = "@JannisWrites",
                 twitter_card_type = "summary",
                 twitter_site = "@JannisWrites"
@@ -208,10 +222,10 @@ ui <- dashboardPage(
                         HTML(
                             paste0(
                                 "This directory of acculturation scales is part of the publication '",
-                                tags$i("The Migration Experience: A Conceptual Framework and Systematic Review of Psychological Acculturation") , 
+                                tags$i("The Migration Experience: A Conceptual Framework and Systematic Scoping Review of Psychological Acculturation") , 
                                 "' (",
                                 tags$a(href="https://doi.org/toBePublished", target="_blank", "doi.org/toBePublished"),
-                                "). As part of our systematic review of the literature on acculturation, we collected and analyzed 
+                                "). As part of our systematic scoping review of the literature on acculturation, we collected and analyzed 
                                 scales that were used to measure 'psychological acculturation'. For all scales we extracted the publicly available
                                 scale construction (see 'View' column) and then coded whether the scales conceptualized psychological acculturation in terms of
                                 affect (e.g., feeling at home), behavior (e.g., language use), cognition (e.g., ethnic identification), 
@@ -221,10 +235,81 @@ ui <- dashboardPage(
                     )
                 )
             ),
+            tabItem(tabName = "theories",
+                    fluidRow(
+                      box(
+                        width = 12,
+                        status = "primary",
+                        DT::dataTableOutput("theoriesTable") # main datatable
+                      )),
+                    fluidRow(
+                      box(
+                        title = "Filters", # filter box with filter inputs
+                        width = 6,
+                        
+                        searchInput(
+                          inputId = "theorySearch", 
+                          label = "Search within theory names",
+                          placeholder = "Your search term (e.g., cultural) ...",
+                          btnSearch = icon("search"),
+                          btnReset = icon("remove")
+                        ),
+                        
+                        hr(),
+                        
+                        awesomeCheckbox(
+                          inputId = "theoryExperienceCheck",
+                          label = tags$b("Filter by Experience Aspects"), 
+                          value = FALSE
+                        ),
+                        prettySwitch(
+                          inputId = "theoryAffectSwitch",
+                          label = "Affect", 
+                          status = "success",
+                          value = TRUE,
+                          inline = TRUE,
+                          fill = TRUE
+                        ),
+                        prettySwitch(
+                          inputId = "theoryBehaviorSwitch",
+                          label = "Behavior", 
+                          status = "success",
+                          value = TRUE,
+                          inline = TRUE,
+                          fill = TRUE
+                        ),
+                        prettySwitch(
+                          inputId = "theoryCognitionSwitch",
+                          label = "Cognition", 
+                          status = "success",
+                          value = TRUE,
+                          inline = TRUE,
+                          fill = TRUE
+                        ),
+                        prettySwitch(
+                          inputId = "theoryDesireSwitch",
+                          label = "Desire", 
+                          status = "success",
+                          value = TRUE,
+                          inline = TRUE,
+                          fill = TRUE
+                        )
+                      ),
+                      box(
+                        title = "Information", # information panel (dynamic)
+                        width = 6,
+                        tags$h5(tags$b("Currently Selected:")),
+                        valueBoxOutput("nTheoriesSelected", width = 6),
+                        valueBoxOutput("percTheoriesSelected", width = 6),
+                        tags$br(),
+                        tags$p()
+                      )
+                    )
+            ),
             tabItem(tabName = "references", # reference section imported from HTML file
                       fluidRow(
                           box(
-                              title = "Scale References",
+                              title = "References",
                               width = 12,
                               HTML(refSec)
                           )
@@ -236,105 +321,101 @@ ui <- dashboardPage(
                             title = "How to Use the Directory",
                             solidHeader = TRUE,
                             width = 12,
-                            tags$b("Interface"),br(),
-                            "The", a("scale directory", onclick = "openTab('scales')", href="#"),
-                            "consists of three main interface elements:",
-                            tags$ol(
-                                tags$li("The scale data table allows direct access to the scale directory. The table shows all scales that 
-                                        fit the current filters and lists a number of key information about the scale. Next to the name of the scale,
-                                        the apa short reference, the number or items, and number of life domains, the overview also indicates 
-                                        whether the scale included any of the affect, behavior, cognition, and/or desire aspects (ABCD). 
-                                        Lastly, the first column is a click-able area, which gives access to additional information about the scale.
-                                        Wherever (publicly) available, we list the exact items, the response options, the life domains considered,
-                                        as well as some information on the validation sample."),
-                                tags$li("The filter section currently houses three main filters to identify scales that fit your needs:",
-                                        tags$ul(
-                                            tags$li("The",
-                                                    tags$i("Title Search"),
-                                                    "lets you search for words in the title of the scale. This might aid users searching for a
-                                                    particular scale by name or for a topic that might be included as part of the scale name (e.g., 
-                                                    attitudes)."
-                                            ),
-                                            tags$li("The",
-                                                    tags$i("Experience Aspect Filter"),
-                                                    "allows to filter the inclusion of the affect, behavior, cognition,
-                                                    and/or desire aspects. If this filter is disabled any combination of ABCD will be
-                                                    displayed but once enabled only the scales that fit your ABCD selection will be selected. 
-                                                    For more information on the ABCD aspects see the 'Model' section below. Note that within
-                                                    this section the header of the data table allows for simple sorting options by the content
-                                                    of the available columns."
-                                                    ),
-                                            tags$li("The",
-                                                    tags$i("Number of Items Filter"),
-                                                   "allows to filter the acculturation scales by the number of items. You can use the slider to 
-                                                   select the minimum and maximum number of items the scale is allowed to have."
-                                                    ),
-                                            tags$li("The",
-                                                    tags$i("Number of Domains Filter"),
-                                                    "allows to filter the scales by the number of life domains (i.e., situational contexts) assessed
-                                                    within the scale. You can use the slider to select the minimum and maximum number of domains you 
-                                                    would like to be included. For more information on the life domains see the 'Model' section below."
-                                                    )
-                                            )
-                                        ),
-                                tags$li("The information section offers a top-level overview of the current scale selection.
-                                        The current version shows the number scales that fit the current filter choices, 
-                                        the average number of items of the selected scales, the total number of items of all
-                                        selected scales, as well as a short general introduction to the directory.")
-                            ),
-                            tags$b("Features"),br(),
-                            "This scale directory has three main functions.",
-                            tags$ol(
-                                tags$li("Measurement Selection: The most practical function of this application is to aid researchers and practitioners 
-                                        in the selection of acculturation measurements. The study of acculturation has produced an immense number of 
-                                        acculturation scales, and making a choice between these different tools can be difficult. Not only is it difficult 
-                                        to gain an overview of the number of scales used within the literature, also the diversity in style and content can 
-                                        be overwhelming. We hope that the filter options we provide in our application can offer a first theory-based and 
-                                        intuitive entry into the plethora for acculturation scales. It should be noted that this directory is not meant to 
-                                        replace a full methodological review and does only present a small amount of information on the scales."),
-                                tags$li("Scale Access: We do so by showcasing all (publicly) available scale items by clicking the eye icon in the
-                                        'View' column. We additionally list the full reference to the
-                                        scale in the", a("References", onclick = "openTab('references')", href="#"),"tab (also see the 'Reference' 
-                                        column in the", a("scale directory", onclick = "openTab('scales')", href="#"),")."),
-                                tags$li("Exploration of Review Results: As part of the framework development and systematic review, we have arrived at a 
-                                        number of conclusions about the methodological literature on acculturation. We hope that readers can use this 
-                                        directory in conjunction with the main article and explore the results themselves. The data table and the appended 
-                                        filter allow readers an interactive access to the data and users might gain an intuitive understanding of the current 
-                                        state of the literature"),
+                            column(
+                              width = 12,
+                              tags$b("Sections"),br(),
+                              "The directory consists of two main interactive sections:",
+                              tags$ol(
+                                tags$li("The", a("scale directory", onclick = "openTab('scales')", href="#"), "scale data table allows direct access to the scale directory. The table shows all scales that 
+                                          fit the current filters and lists a number of key information about the scale. Next to the name of the scale,
+                                          the apa short reference, the number or items, and number of life domains, the overview also indicates 
+                                          whether the scale included any of the affect, behavior, cognition, and/or desire aspects (ABCD). 
+                                          Lastly, the first column is a click-able area, which gives access to additional information about the scale.
+                                          Wherever (publicly) available, we list the exact items, the response options, the life domains considered,
+                                          as well as some information on the validation sample."),
+                                tags$li("The", a("theory directory", onclick = "openTab('theories')", href="#"), "scale data table allows direct access to the scale directory. The table shows all scales that 
+                                          fit the current filters and lists a number of key information about the scale. Next to the name of the scale,
+                                          the apa short reference, the number or items, and number of life domains, the overview also indicates 
+                                          whether the scale included any of the affect, behavior, cognition, and/or desire aspects (ABCD). 
+                                          Lastly, the first column is a click-able area, which gives access to additional information about the scale.
+                                          Wherever (publicly) available, we list the exact items, the response options, the life domains considered,
+                                          as well as some information on the validation sample.")
+                                ),
+                              tags$b("Interface"),br(),
+                              "The each of the main sections includes a number of important interface elements:",
+                              tags$ol(
+                                  tags$li("The main content table sits at the top of each tab and allows direct access to the scales or theories. 
+                                          The table shows all results that fit the current filters and lists a number of key information, including any 
+                                          of the affect, behavior, cognition, and/or desire aspects that were coded. 
+                                          Lastly, the first column of the", a("scale directory", onclick = "openTab('scales')", href="#"), "is a click-able area, 
+                                          which gives access to additional information about the scale.
+                                          Wherever (publicly) available, we list the exact items, the response options, the life domains considered,
+                                          as well as some information on the validation sample."),
+                                  tags$li("The filter section currently houses several main filters to identify scales and theories that fit your needs. 
+                                          It allows for the search of key words within the title, filter the inclusion of the affect, behavior, cognition,
+                                          and/or desire aspects, as well as additional sliders to filter the scales by the number of items and life domains."),
+                                  tags$li("The information section offers a top-level overview of the current selection.
+                                          The current version shows the number of results that fit the current filter choices, as well as additional selection 
+                                          metrices.")
+                              ),
+                              tags$b("Features"),br(),
+                              "This directory has three main functions.",
+                              tags$ol(
+                                  tags$li("Selection: The most practical function of this application is to aid researchers and practitioners 
+                                          in the selection of acculturation measurements and theories. The study of acculturation has produced an immense number of 
+                                          acculturation approaches, and making a choice between these different viewpoints can be difficult. Not only is it difficult 
+                                          to gain an overview of the number of scales and theories used within the literature, but also the diversity in style and content can 
+                                          be overwhelming. We hope that the filter options we provide in this application can offer a first structured and 
+                                          intuitive entry into the plethora for acculturation approaches. It should be noted that this directory is not meant to 
+                                          replace a full methodological review and does only present a small amount of information on the theories and scales."),
+                                  tags$li("Access: For the acculturation scales, we showcase all (publicly) available scale items by clicking the eye icon in the
+                                          'View' column. We additionally list the full reference to all available 
+                                          theories and scales in the", a("References", onclick = "openTab('references')", href="#"),"tab (also see the 'Reference' 
+                                          column in the", a("scale directory", onclick = "openTab('scales')", href="#"), "and the",
+                                          a("theory directory", onclick = "openTab('theories')", href="#"),")."),
+                                  tags$li("Exploration of Review Results: As part of the framework development and systematic scoping review, we have arrived at a 
+                                          number of conclusions about the theoretical and methodological literature on acculturation. We hope that readers can use this 
+                                          directory in conjunction with the main article and explore the results themselves. The data table and the appended 
+                                          filter allow readers an interactive access to the data and users might gain an intuitive understanding of the current 
+                                          state of the literature"),
+                              )
                             )
                         ),
                         box(
                             title = "The Review",
                             solidHeader = TRUE,
                             width = 12,
-                            "One of the key challenges to researching psychological acculturation is an immense heterogeneity in theories and measures. 
-                            These inconsistencies make it difficult to compare past literature on acculturation, hinder straight-forward measurement 
-                            selections, and hampers the development of an overarching framework. To structure our understanding of the migration process, 
-                            we propose to utilize the four basic elements of human experiences (wanting, feeling, thinking, and doing) as a conceptual 
-                            framework. We use this framework to build a theory-driven literature synthesis of past theoretical 
-                            (final ", tags$i("N"), " = 92), methodological (final ", tags$i("N"), " = 233) and empirical literature (final ", 
-                            tags$i("N"), " = 530). We find that especially empirical works have understudied the more internal aspects of acculturation 
-                            (motivations and feelings) and have often fallen short of capturing all four aspects of the migration experience. 
-                            We also show differences between publication fields and discuss how the framework can aid transparent and functional theories, 
-                            studies, and interventions going forward."
+                            column(
+                              width = 12,
+                              "One of the key challenges to researching psychological acculturation is an immense heterogeneity in theories and measures. 
+                              These inconsistencies make it difficult to compare past literature on acculturation, hinder straight-forward measurement 
+                              selections, and hampers the development of an overarching framework. To structure our understanding of the migration process, 
+                              we propose to utilize the four basic elements of human experiences (wanting, feeling, thinking, and doing) as a conceptual 
+                              framework. We use this framework to build a theory-driven literature synthesis of past theoretical 
+                              (final ", tags$i("N"), " = 92), methodological (final ", tags$i("N"), " = 233) and empirical literature (final ", 
+                              tags$i("N"), " = 530). We find that especially empirical works have understudied the more internal aspects of acculturation 
+                              (motivations and feelings) and have often fallen short of capturing all four aspects of the migration experience. 
+                              We also show differences between publication fields and discuss how the framework can aid transparent and functional theories, 
+                              studies, and interventions going forward."
+                            )
                         ),
                         box(
-                            title = "The Model",
+                            title = "The Framework",
                             solidHeader = TRUE,
                             width = 12,
                             column(
                                 width = 12,
                                 HTML(
                                     "<br>To build a framework that would comprehensively structure the concept of psychological acculturation across a wide range of contexts, 
-                                    we propose to utilize the basic elements of human experiences. Building on discussions with experts in the field and past reviews, 
+                                    we propose to utilize the basic elements of human experiences. Building on conceptual developments within the acculturation literature, 
                                     we propose that the psychological acculturation experience can be understood in terms of affects, behaviors, cognitions, and desires. 
                                     Psychological acculturation in this framework might, for example, be understood or measured in terms of behavioral acculturation, 
                                     such as language use, or voting; cognitive acculturation, such as ethnic identification, or cultural values endorsement; 
                                     affective acculturation, such as feeling at home, or loneliness; motivational acculturation, such as the satisfaction of competence or 
-                                    independence needs; or as a combination of any or all of these aspects. Coding the available acculturation scales identified during the 
-                                    systematic review inspired the creation of this scale directory and the chosen filter options.<br><br>",
-                                    "Three major contextual factors often found within the literature are the cultures of the dominant and non-dominant groups, 
-                                    the interacting individuals, and the interaction situation or life domain. All of these contextual elements will likely have a profound 
+                                    independence needs; or as a combination of any or all of these aspects. Coding the available acculturation theories, and scales identified during the 
+                                    systematic scoping review inspired the creation of this directory and the chosen filter options.<br><br>",
+                                    "Three major contextual factors often found within the literature are the relevant cultural patterns, the contact situation, 
+                                    as well as the interacting individuals. All of these contextual elements will likely have a profound 
                                     impact on the experience of affects, behaviors, cognitions, and desires. As part of the directory we present here, we list the situational 
                                     context that is captured in the acculturation scales. One way of structuring this situational context is what we will here refer to as 
                                     the life domains &#8212 the idea that the social experience will take place within different domains in life. Based on sociological 
@@ -381,6 +462,20 @@ server <- function(input, output) {
             shinyjs::disable("DesireSwitch")
         }
         })
+  
+    observeEvent(input$theoryExperienceCheck, {
+      if(input$theoryExperienceCheck == TRUE){
+        shinyjs::enable("theoryAffectSwitch")
+        shinyjs::enable("theoryBehaviorSwitch")
+        shinyjs::enable("theoryCognitionSwitch")
+        shinyjs::enable("theoryDesireSwitch")
+      }else{
+        shinyjs::disable("theoryAffectSwitch")
+        shinyjs::disable("theoryBehaviorSwitch")
+        shinyjs::disable("theoryCognitionSwitch")
+        shinyjs::disable("theoryDesireSwitch")
+      }
+    })
     
     # filter datatable based on filter inputs
     scaleSelectedReact <- reactive({
@@ -403,6 +498,21 @@ server <- function(input, output) {
                        nlifeDomain >= input$sliderNDomains[[1]], 
                        nlifeDomain <= input$sliderNDomains[[2]])
         }
+    })
+    
+    theorySelectedReact <- reactive({
+      if(input$theoryExperienceCheck == TRUE){
+        theoriesSelected %>%
+          filter(grepl(tolower(input$theorySearch), tolower(Theory)),
+                 Affect == ifelse(input$theoryAffectSwitch==TRUE, as.character(icon("ok", lib = "glyphicon")), ""),
+                 Behavior == ifelse(input$theoryBehaviorSwitch==TRUE, as.character(icon("ok", lib = "glyphicon")), ""),
+                 Cognition == ifelse(input$theoryCognitionSwitch==TRUE, as.character(icon("ok", lib = "glyphicon")), ""),
+                 Desire == ifelse(input$theoryDesireSwitch==TRUE, as.character(icon("ok", lib = "glyphicon")), "")
+                 )
+      } else {
+        theoriesSelected %>%
+          filter(grepl(tolower(input$theorySearch),tolower(Theory)))
+      }
     })
     
     # create data table based on reactive (i.e., filtered) data set.
@@ -428,6 +538,25 @@ server <- function(input, output) {
             formatStyle(2, cursor = 'pointer')
                                              }) 
     
+    output$theoriesTable = DT::renderDataTable({
+      datatable(theorySelectedReact(), 
+                colnames = c("Theory", "Reference", "Affect", "Behavior", "Cognition", "Desire"), 
+                rownames = FALSE, 
+                selection = 'none',
+                # class = 'cell-border strip hover',
+                escape = FALSE,
+                extensions = 'Scroller',
+                options = list(
+                  scrollX = TRUE,
+                  scrollY = 500,
+                  scroller = TRUE,
+                  searching = FALSE,
+                  columnDefs=list(list(targets=3:length(theoriesSelected)-1, class="dt-center"))
+                )
+                ) %>% 
+        formatStyle(2, cursor = 'pointer')
+    }) 
+    
     # calculate data information boxes
     output$nScalesSelected <- renderValueBox({
         valueBox(
@@ -452,6 +581,22 @@ server <- function(input, output) {
             icon = icon("tasks"),
             color = "light-blue"
         )
+    })
+    output$nTheoriesSelected <- renderValueBox({
+      valueBox(
+        nrow(theorySelectedReact()),
+        paste0("of ", nrow(dt.Theories.Included), " theories"),
+        icon = icon("filter"),
+        color = "light-blue"
+      )
+    })
+    output$percTheoriesSelected <- renderValueBox({
+      valueBox(
+        (nrow(theorySelectedReact())/nrow(dt.Theories.Included)) %>% scales::percent(),
+        "of available theories",
+        icon = icon("percentage"),
+        color = "light-blue"
+      )
     })
     
     # create pop up box. If person clicks on eye symbol the information from the main data frame is displayed as HTML element
@@ -486,6 +631,21 @@ server <- function(input, output) {
             ),
             footer = modalButton("OK")
         ))
+    })
+    observeEvent(input$theoriesTable_cell_clicked, {
+      info = input$theoriesTable_cell_clicked
+      id = info$value
+      # do nothing if not clicked yet, or the clicked cell is not in the first column
+      if (is.null(info$value) || info$col != 1) return()
+      showModal(modalDialog(
+        title = paste0("Reference for: ", dt.Theories.Included$Theory[dt.Theories.Included$ShortReference==id]),
+        easyClose = TRUE,
+        tags$div(
+          HTML(paste(dt.Theories.Included$Source[dt.Theories.Included$ShortReference==id],
+                     sep = ""))
+        ),
+        footer = modalButton("OK")
+      ))
     })
     
 }

@@ -25,6 +25,8 @@ load("../acculturation-review/data/AcculturationScales.RData")
 
 dt.Scales.Included <- dt.Scales.Included %>%
     mutate(id = seq.int(nrow(dt.Scales.Included)))
+dt.Theories.Included <- dt.Theories.Included %>%
+  mutate(id = seq.int(nrow(dt.Theories.Included)))
 ```
 
 ```{r methodologicalTbl, echo=FALSE}
@@ -39,5 +41,32 @@ dt.Scales.Included %>%
                 html_font = "Cambria")
 ```
 
-# References  
+```{r theoreticalTbl, echo=FALSE}
+dt.Theories.Included %>%
+  dplyr::select(id, Theory, ShortReference = CitationKey) %>%
+  mutate(ShortReference = paste0("@",ShortReference)) %>%
+  kbl(., 
+      caption = "Acculturation Theories",
+      format = "html") %>%
+  kable_classic(full_width = F, 
+                lightable_options = "hover", 
+                html_font = "Cambria")
+```
 
+```{r methTheoryTbl, echo=FALSE}
+# dt.Scales.Included %>%
+#   dplyr::transmute(Name = Scale, source = "scales", ShortReference = CitationKey) %>%
+#   rbind(., dt.Theories.Included %>% dplyr::transmute(Name = Theory, source = "theory", ShortReference = CitationKey)) %>%
+#   mutate(
+#     ShortReference = paste0("@",ShortReference),
+#     id = row_number()
+#   ) %>%
+#   kbl(., 
+#       caption = "Acculturation References",
+#       format = "html") %>%
+#   kable_classic(full_width = F, 
+#                 lightable_options = "hover", 
+#                 html_font = "Cambria")
+```
+
+# References  
