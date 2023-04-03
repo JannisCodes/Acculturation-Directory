@@ -5,7 +5,7 @@
 
 
 This GitHub repository collects the code for the acculturation scale directory. 
-A live version of the shiny dashboard is available here: https://acculturation-review.shinyapps.io/scale-directory/
+A live version of the shiny dashboard is available here: https://acculturation-review.shinyapps.io/acculturation-directory/
 
 The data files are currently not available in the GitHub repository but will be made public as part of our open data 
 respositry for the associated academic publication.
